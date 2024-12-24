@@ -1,17 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { ConversionResult } from '../components/ConversionResult'
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react"
 
 export default function Home() {
+  const router = useRouter()
   const { data: session, status } = useSession()
   const [repoUrl, setRepoUrl] = useState('')
   const [isConverting, setIsConverting] = useState(false)
   const [error, setError] = useState('')
   const [conversionResult, setConversionResult] = useState(null)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,19 +56,13 @@ export default function Home() {
   if (status === "loading") {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">Caricamento...</div>
       </div>
     )
   }
 
   if (!session) {
-    return (
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Convertitore Tailwind in Design Tokens</h1>
-        <p className="mb-4">Accedi con GitHub per iniziare.</p>
-        <Button onClick={() => signIn('github')}>Accedi con GitHub</Button>
-      </div>
-    )
+    return null // This will prevent any flash of unauthenticated content
   }
 
   return (
@@ -80,7 +82,6 @@ export default function Home() {
       </form>
       {error && <p className="text-red-500 mt-4">{error}</p>}
       {conversionResult && <ConversionResult {...conversionResult} />}
-      <Button onClick={() => signOut()} className="mt-4">Logout</Button>
     </div>
   )
 }
