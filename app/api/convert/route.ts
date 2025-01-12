@@ -3,6 +3,12 @@ import { Queue } from 'bullmq'
 
 const conversionQueue = new Queue('conversion')
 
+/*
+const audioQueue = new Queue("audio transcoding", {
+  redis: { port: 6379, host: "127.0.0.1", password: "foobared" },
+})
+*/
+
 export async function POST(req: Request) {
   const { repoUrl } = await req.json()
 
